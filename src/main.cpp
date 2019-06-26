@@ -22,37 +22,37 @@ volatile bool buttonPressed;
 ISR(TIM0_OVF_vect)
 {
   // Debounce
-  static uint8_t currState = 0;
-  static uint8_t lastState = 0;
-  uint8_t state = PINB & (1 << PINB4);
-  static uint8_t count = 0;
+  // static uint8_t currState = 0;
+  // static uint8_t lastState = 0;
+  // uint8_t state = PINB & (1 << BUTTON);
+  // static uint8_t count = 0;
 
-  if (state != lastState)
-    {
-      count = 5;
-    }
+  // if (state != lastState)
+  //   {
+  //     count = 5;
+  //   }
 
-  if (count > 0)
-    {
-      count--;
-    }
-  else
-    {
-      if (state != currState)
-        {
-          currState = state;
+  // if (count > 0)
+  //   {
+  //     count--;
+  //   }
+  // else
+  //   {
+  //     if (state != currState)
+  //       {
+  //         currState = state;
 
-          if (currState == 1)
-            {
-              buttonPressed = true;
-            }
-        }
-    }
+  //         if (currState == 1)
+  //           {
+  //             buttonPressed = true;
+  //           }
+  //       }
+  //   }
 
-  lastState = state;
+  // lastState = state;
   timerCounter++;
 
-  if (timerCounter == 183) // 10 seconds
+  if (timerCounter == 183) // ~10 seconds
     {
       timerCounter = 0;
     }
@@ -74,18 +74,18 @@ int main()
   cli();
   // set_sleep_mode(SLEEP_MODE_IDLE);
   // sleep_enable();
-  // clock frequency / 1024
-  TCCR0B = (1 << CS02) | (1 << CS00);
+  // clock frequency / 8
+  TCCR0B = (1 << CS01);
   TIMSK0 |= (1 << TOIE0);
   // Set LED and system outputs as outputs
   DDRB |= (1 << LED) | (1 << OUTPUT);
   // Write 0
   PORTB &= ~((1 << LED) | (1 << OUTPUT));
   // AREF = AVcc, port selected by defines
-  ADMUX = (1 << REFS0) | (RANDOM);
-  // ADC Enable and prescaler of 128
-  ADCSRA = (1 << ADEN) |
-           (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
+  // ADMUX = (1 << REFS0) | (RANDOM);
+  // // ADC Enable and prescaler of 128
+  // ADCSRA = (1 << ADEN) |
+  //          (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
   // Next command will change prescaler
   CLKPR = (1 << CLKPCE);
   // Set prescaler 256
@@ -102,11 +102,11 @@ int main()
           PORTB ^= (1 << LED);
         }
 
-      if (buttonPressed)
-        {
-          buttonPressed = false;
-          PORTB ^= (1 << LED);
-        }
+      // if (buttonPressed)
+      //   {
+      //     buttonPressed = false;
+      //     PORTB ^= (1 << LED);
+      //   }
 
       // sleep_cpu(); //и в самом конце цикла - уходим в сон.
     }

@@ -19,6 +19,8 @@ bool isActive;
 
 volatile bool buttonPressed;
 
+volatile bool step;
+
 ISR(TIM0_OVF_vect)
 {
   // Debounce
@@ -26,12 +28,10 @@ ISR(TIM0_OVF_vect)
   // static uint8_t lastState = 0;
   // uint8_t state = PINB & (1 << BUTTON);
   // static uint8_t count = 0;
-
   // if (state != lastState)
   //   {
   //     count = 5;
   //   }
-
   // if (count > 0)
   //   {
   //     count--;
@@ -41,20 +41,19 @@ ISR(TIM0_OVF_vect)
   //     if (state != currState)
   //       {
   //         currState = state;
-
   //         if (currState == 1)
   //           {
   //             buttonPressed = true;
   //           }
   //       }
   //   }
-
   // lastState = state;
   timerCounter++;
 
-  if (timerCounter == 183) // ~10 seconds
+  if (timerCounter == 1) // ~10 seconds
     {
       timerCounter = 0;
+      step = true;
     }
 }
 
@@ -74,8 +73,8 @@ int main()
   cli();
   // set_sleep_mode(SLEEP_MODE_IDLE);
   // sleep_enable();
-  // clock frequency / 8
-  TCCR0B = (1 << CS01);
+  // clock frequency / 1024
+  TCCR0B = (1 << CS02) | (1 << CS00);
   TIMSK0 |= (1 << TOIE0);
   // Set LED and system outputs as outputs
   DDRB |= (1 << LED) | (1 << OUTPUT);
@@ -97,8 +96,9 @@ int main()
 
   while (1)
     {
-      if (timerCounter == 0)
+      if (step)
         {
+          step = false;
           PORTB ^= (1 << LED);
         }
 
@@ -107,7 +107,6 @@ int main()
       //     buttonPressed = false;
       //     PORTB ^= (1 << LED);
       //   }
-
       // sleep_cpu(); //и в самом конце цикла - уходим в сон.
     }
 }
